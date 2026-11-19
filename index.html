@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#05070f" />
+    <meta name="color-scheme" content="dark light" />
+    <meta property="og:title" content="United States Atlas — An Interactive Map of All 50 States" />
+    <meta property="og:description" content="Explore all 50 states and D.C. with animated maps, five data views, state profiles, and a timed geography quiz." />
+    <meta property="og:type" content="website" />
+    <meta name="description" content="An animated, fully interactive atlas of the United States — explore all 50 states, compare data, and test your geography knowledge." />
+    <title>United States Atlas — An Interactive Map of All 50 States</title>
+    <script>
+      try {
+        const stored = localStorage.getItem('atlas-theme');
+        if (stored === 'light' || stored === 'dark') document.documentElement.dataset.theme = stored;
+      } catch (e) {}
+    </script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23070b14'/%3E%3Cpath d='M20 40 L32 14 L44 40 Z' fill='%234dd8ff'/%3E%3Cpath d='M26 40 L32 26 L38 40 Z' fill='%23fbbf24'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true">
+      <div class="backdrop-grid"></div>
+      <span class="orb orb-a"></span>
+      <span class="orb orb-b"></span>
+      <span class="orb orb-c"></span>
+    </div>
+
+    <div class="app">
+      <header class="topbar">
+        <h1 class="sr-only">United States Atlas — an interactive map of all 50 states</h1>
+        <a class="brand" href="#" aria-label="United States Atlas home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M8 30 C8 19 17 9 28 9 C35 9 40 13 40 19 C40 28 30 38 19 38" />
+              <path d="M18 21 L24 8 L30 21" />
+              <path d="M22 33 L30 21 L38 33" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <span class="brand-title">United States Atlas</span>
+            <span class="brand-sub">50 states · one living map</span>
+          </span>
+        </a>
+
+        <nav class="tabs" id="viewTabs" role="tablist" aria-label="View">
+          <button class="tab is-active" data-view="explore" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15M15 6v15"/></svg>
+            Explore
+          </button>
+          <button class="tab" data-view="quiz" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.1 9a3 3 0 115.8 1c-.5 1.2-2 1.6-2.6 2.6-.2.4-.3.9-.3 1.4"/><circle cx="12" cy="18" r=".6"/><circle cx="12" cy="12" r="9"/></svg>
+            Quiz
+          </button>
+        </nav>
+
+        <div class="topbar-actions">
+          <button class="pill-btn" id="randomBtn" type="button" title="Jump to a random state (R)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.3"/><circle cx="15.5" cy="15.5" r="1.3"/><circle cx="15.5" cy="8.5" r="1.3"/><circle cx="8.5" cy="15.5" r="1.3"/></svg>
+            <span>Surprise me</span>
+          </button>
+          <button class="icon-btn" id="themeBtn" type="button" title="Toggle light / dark theme" aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 019.5 3.5a8.5 8.5 0 1011 11z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="map-card" aria-label="Interactive map">
+          <div class="map-toolbar">
+            <div class="quiz-mode-tag" aria-hidden="true">
+              <span class="live-dot"></span> Quiz mode <span class="qmt-sub">no labels</span>
+            </div>
+            <div class="search" id="searchWrap">
+              <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+              <input id="searchInput" type="text" placeholder="Search a state or capital…" autocomplete="off" spellcheck="false" aria-label="Search states or capitals" />
+              <kbd>/</kbd>
+              <div class="search-results" id="searchResults" role="listbox" aria-label="Search results"></div>
+            </div>
+            <div class="map-hint">
+              <span><b>Scroll</b> to zoom</span>
+              <span><b>Drag</b> to pan</span>
+              <span><b>Click</b> a state</span>
+            </div>
+          </div>
+
+          <div class="metric-bar">
+            <span class="metric-label">Color by</span>
+            <div class="metric-pills" id="metricPills" role="group" aria-label="Color states by"></div>
+          </div>
+
+          <div class="map-stage" id="mapStage">
+            <svg id="map" viewBox="0 0 975 610" role="img" aria-label="Map of the United States" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="seaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--sea-top)" />
+                  <stop offset="100%" stop-color="var(--sea-bottom)" />
+                </linearGradient>
+                <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="var(--accent)" stop-opacity=".34" />
+                  <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
+                </radialGradient>
+                <pattern id="mapDots" width="26" height="26" patternUnits="userSpaceOnUse">
+                  <circle cx="1.4" cy="1.4" r="1.1" fill="var(--map-dot)" />
+                </pattern>
+                <filter id="stateGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="5" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity=".45" />
+                </filter>
+              </defs>
+              <rect class="sea" width="975" height="610" fill="url(#seaGradient)" />
+              <rect class="sea-dots" width="975" height="610" fill="url(#mapDots)" />
+              <circle class="sea-glow" cx="500" cy="300" r="330" fill="url(#glowGradient)" />
+              <g id="zoomLayer">
+                <g id="statesLayer"></g>
+                <g id="labelsLayer" class="labels-layer"></g>
+                <g id="pinsLayer"></g>
+              </g>
+            </svg>
+
+            <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+            <div class="map-controls">
+              <button class="map-btn" id="zoomIn" type="button" aria-label="Zoom in" title="Zoom in (+)">+</button>
+              <button class="map-btn" id="zoomOut" type="button" aria-label="Zoom out" title="Zoom out (−)">−</button>
+              <button class="map-btn" id="zoomReset" type="button" aria-label="Reset view" title="Reset view (0)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 111.9 6.3"/><path d="M4 4v6h6"/></svg>
+              </button>
+            </div>
+
+            <div class="quiz-flash" id="quizFlash" aria-hidden="true"></div>
+            <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
+          </div>
+
+          <div class="legend" id="legend">
+            <div class="legend-head" id="legendHead">Census region</div>
+            <div class="legend-gradient" id="legendGradient"></div>
+            <div class="legend-scale" id="legendScale"></div>
+            <div class="legend-regions" id="legendRegions"></div>
+          </div>
+
+          <div class="stats-strip" id="statsStrip"></div>
+        </section>
+
+        <aside class="sidebar" id="sidebar" aria-live="polite"></aside>
+      </main>
+
+      <footer class="footer">
+        <span>Data: U.S. Census Bureau (2020) · boundaries: U.S. Census Cartographic Boundary Files</span>
+        <span class="footer-keys"><kbd>/</kbd> search <kbd>R</kbd> random <kbd>0</kbd> reset <kbd>Q</kbd> quiz</span>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
